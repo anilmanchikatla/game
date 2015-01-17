@@ -1,0 +1,33 @@
+                                <!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="myCanvas" width="500" height="500"
+style="border:1px solid #c3c3c3;">
+Your browser does not support the HTML5 canvas tag.
+</canvas>
+<script>
+
+
+var gameLoop = setInterval(drawingLoop,200);
+var x=0,y=0;
+function drawingLoop()
+{
+	var c = document.getElementById("myCanvas");
+	var ctx = c.getContext("2d");
+	ctx.clearRect(0,0,500,500);
+	ctx.fillRect(x, y, 20, 20);
+	
+	x+=20;
+	y+=20;
+	if(x>500)
+	{
+		clearInterval(gameLoop);
+	}
+}
+	
+</script>
+
+</body>
+</html>
+                            

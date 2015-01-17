@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head lang="<?php echo $str_language; ?>" xml:lang="<?php echo $str_language; ?>">
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<title>Sockets test!</title>
+	<link rel="stylesheet" type="text/css" media="screen" href="/site.css" />
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/desktop.js"></script>
+	<script type="text/javascript" src="/game.js"></script>
+</head>
+
+<body id="desktop">
+
+
+	<div id="unique-url">
+		<p>Visit <span>http://<?php print $_SERVER['HTTP_HOST']; ?>/mobile.php?id=%id</span> on your mobile device for a second screen experience, or use the following QR code: <img src="https://chart.googleapis.com/chart?cht=qr&chl=http%3A%2F%2F<?php print $_SERVER['HTTP_HOST']; ?>%2Fmobile.php%3Fid%3D%id&choe=UTF-8&chs=150x150" /></p>
+		<a id="close" href="#">X</a>
+	</div>
+
+	<div id="status-message">
+		<p>THIS IS A STATUS MESSAGE</p>
+	</div>
+	<div id="game-area">
+	<canvas id="myCanvas" width="500" height="500"
+style="border:1px solid #c3c3c3;background:url(snakes-and-ladders.jpg);background-repeat: no-repeat;background-size: 100% 100%;">
+Your browser does not support the HTML5 canvas tag.
+</canvas>
+<button id="start" onclick="startGame()" >Start</button>
+<button id="roller" onclick="rollDice()" style="display:none">Roll</button>
+<span id='ans' ></span>
+<img id="scream" src="Chess.png" alt="The Scream"
+width="25" height="25" style="display:none">
+<img id="snake" src="Snake.jpg" alt="The Scream"
+width="25" height="25" style="display:none">
+</div>
+	
+
+</body>
+<script>
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+var d=0;
+var x=5,y=470;
+var Map={};
+Map[155*500+470]=305*500+420;
+Map[405*500+470]=455*500+320;
+Map[155*500+420]=305*500+470;
+Map[5*500+420]=105*500+320;
+Map[355*500+370]=155*500+70;
+Map[5*500+320]=55*500+220;
+Map[305*500+220]=305*500+320;
+Map[455*500+220]=305*500+170;
+Map[155*500+170]=5*500+220;
+Map[105*500+170]=5*500+70;
+Map[455*500+120]=455*500+20;
+Map[355*500+20]=355*500+120;
+Map[255*500+20]=255*500+120;
+Map[55*500+20]=105*500+120;
+Map[55*500+170]=55*500+420;
+Map[305*500+70]=155*500+370;
+var right=true;
+for(i=0;i<=10;i++)
+{
+	ctx.moveTo(0,d);
+	ctx.lineTo(500,d);
+	ctx.stroke();
+	d+=50;
+}
+d=0;
+for(i=0;i<=10;i++)
+{
+	ctx.moveTo(d,0);
+	ctx.lineTo(d,500);
+	ctx.stroke();
+	d+=50;
+}
+function drawChar(a,b) {
+    var c = document.getElementById("myCanvas");
+    var ctx = c.getContext("2d");    
+    var img = document.getElementById("scream");
+    ctx.drawImage(img,a,b,25,25);
+}
+
+function removeChar(a,b)
+{
+	var c = document.getElementById("myCanvas");
+    	var ctx = c.getContext("2d");
+	var img = ctx.createImageData(25, 25);
+	for (var i = img.data.length; --i >= 0; )
+  	img.data[i] = 0;
+  	ctx.putImageData(img, a, b);
+}
+function startGame()
+{
+ document.getElementById('roller').style.display='block';
+ document.getElementById('start').style.display='none';
+drawChar(x,y);
+}
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+var startX,startY,endX,endY;
+var addX=0,addY=0;
+var gameLoop;
+function rollDice()
+{
+	var dieval=getRandomInt(1,6);
+	removeChar(x,y);
+	var prevx=x;
+	var prevy=y;
+	if(right)
+	x+=50*dieval;
+	else
+	x-=50*dieval;
+	if(x>500)
+	{
+		x=455;
+		y-=50;
+		right=false;
+	}
+	if(x<0&&y!=20)
+	{
+		x=5;
+		y-=50;
+		right=true;
+	}
+	if(x==5&&y==20)
+	{
+		drawChar(x,y);
+		alert("You won");
+		document.getElementById('roller').style.display='none';
+		return;
+	}
+	if(x<0&&y==20)
+	{
+	
+		x=prevx;
+		y=prevy;
+	}
+	//document.getElementById("ans").innerHTML=x+" "+y+" "+dieval;	
+	drawChar(x,y);
+	
+	if(500*x+y in Map)
+	{
+		 document.getElementById('roller').style.display='none';
+		startX=x;
+		 startY=y;
+		 var newint=parseInt(Map[500*x+y]);
+		 endX=Math.floor(newint/500);
+		 endY=newint%500;
+		 var diffX,deffY;
+		 diffX=diff(startX,endX);
+		 diffY=diff(startY,endY);
+		if(diffX==0)
+		 {
+		 	addX=0;
+		 	addY=5;
+		 }else if(diffY==0)
+		 {
+		 	addY=0;
+		 	addX=5;
+		 }else{
+		 	var factor=gcd(diffX,diffY);
+		 	addX=5*(diffX/factor);
+		 	addY=5*(diffY/factor);
+		 	
+		 }
+		 if(endX<startX)
+		 addX*=-1;
+		 if(endY<startY)
+		 addY*=-1;
+	//	 alert(startX+" "+startY+" "+endX+" "+endY+" "+addX+" "+addY);
+		 gameLoop=setInterval(drawSlow,100);
+		//setTimeout(doSomething, 1000);
+	}
+}
+function drawSlow()
+{
+	removeChar(startX,startY);
+	startX+=addX;
+	startY+=addY;
+	drawChar(startX,startY);
+	if(startX==endX&&startY==endY)
+	{
+		clearInterval(gameLoop);
+		x=endX;
+		y=endY;
+		if((Math.floor(y/50))%2==1)
+		right=true;
+		else
+		right=false;
+		document.getElementById('roller').style.display='block';
+	}
+}
+	
+function doSomething()
+{
+	removeChar(x,y);
+	var newint=parseInt(Map[500*x+y]);
+	drawChar(Math.floor(newint/500),newint%500);
+	x=Math.floor(newint/500);
+	y=newint%500;
+	var fin=Math.floor(y/50);
+	if((Math.floor(y/50))%2==1)
+	right=true;
+	else
+	right=false;
+	document.getElementById('roller').style.display='block';
+}
+var gcd = function(a, b) {
+    if ( ! b) {
+        return a;
+    }
+
+    return gcd(b, a % b);
+};
+var diff = function(a, b) {
+	if(a>b)
+	return a-b;
+	return b-a;
+}
+
+
+</script>
+</html>
